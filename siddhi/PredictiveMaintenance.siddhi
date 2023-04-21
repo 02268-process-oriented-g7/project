@@ -1,1 +1,28 @@
 @App:name("PredictiveMaintenance")
+@App:description("Description of the plan")
+
+@source(type='http', receiver.url='http://localhost:8081/gatherData', @map(type='json'))
+@sink(type='log')
+define stream GatherData(componentLifetime int, installedSensor string);
+
+@source(type='http', receiver.url='http://localhost:8081/validation', @map(type='json'))
+@sink(type='log')
+define stream DataValidation(validation bool);
+
+@source(type='http', receiver.url='http://localhost:8081/model', @map(type='json'))
+@sink(type='log')
+define stream Model(model string, assessmentPassed bool);
+
+@sink(type='http', 
+publisher.url='http://localhost:8080/engine-rest/message', 
+headers='Host:localhost:8080',
+@map(type='json', @payload("""{"messageName":"{{messageName}}", "all": true}""")))
+define stream MessageStream(messageName string);
+
+from DataValidation[validation == true]
+select 'Confirmation' as messageName
+insert into MessageStream;
+
+from Model[assessmentPassed == true]
+select 'Assessment' as messageName
+insert into MessageStream;
