@@ -1,0 +1,103 @@
+@App:name("CamundaStream")
+
+
+@App:description("Login checker")
+
+
+@source(type='http' , receiver.url='http://localhost:8081/camundaStream', @map(type='json')) 
+@sink(type='log')
+define stream LoginInputStream (password string, instanceID string);
+
+@source(type='http' , receiver.url='http://localhost:8081/validateStream', @map(type='json')) 
+@sink(type='log')
+define stream ValidateInputStream (validity bool, instanceID string);
+
+@source(type='http' , receiver.url='http://localhost:8081/receiveSupportStream', @map(type='json')) 
+@sink(type='log')
+define stream ReceiveSupportInputStream (request string, instanceID string);
+
+@source(type='http' , receiver.url='http://localhost:8081/requestActionStream', @map(type='json')) 
+@sink(type='log')
+define stream RequestActionInputStream (actionReq bool, instanceID string);
+
+@source(type='http' , receiver.url='http://localhost:8081/anotherRequestStream', @map(type='json')) 
+@sink(type='log')
+define stream AnotherRequestInputStream (anotherActionReq bool, instanceID string);
+
+@source(type='http' , receiver.url='http://localhost:8081/newCardStream', @map(type='json')) 
+@sink(type='log')
+define stream NewCardInputStream (newCard bool, instanceID string);
+
+@source(type='http' , receiver.url='http://localhost:8081/cancelCardStream', @map(type='json')) 
+@sink(type='log')
+define stream CancelCardInputStream (cancelCard bool, instanceID string);
+
+@source(type='http' , receiver.url='http://localhost:8081/transferStream', @map(type='json')) 
+@sink(type='log')
+define stream TransferInputStream (transfer bool, instanceID string);
+
+@source(type='http' , receiver.url='http://localhost:8081/receivedCardStream', @map(type='json')) 
+@sink(type='log')
+define stream ReceivedCardInputStream (sentCard bool, instanceID string);
+
+
+
+@sink(type='http',
+    publisher.url='http://localhost:8080/engine-rest/message',
+    headers = "Host:localhost:8080",
+    @map(type='json', @payload("""{"messageName":"{{messageName}}", "all": true}""")))
+@sink(type='log')
+define stream RECMessageStream(messageName string);
+
+
+from LoginInputStream[password == "Cool"]
+    select 'login info' as messageName 
+insert into RECMessageStream;
+
+from ValidateInputStream[validity == true]
+    select 'login accepted' as messageName
+insert into RECMessageStream;
+
+from ValidateInputStream[validity == false]
+    select 'try login again' as messageName
+insert into RECMessageStream;
+
+from ReceiveSupportInputStream[request  == "new"]
+    select 'receive selected options' as messageName
+insert into RECMessageStream;
+
+from ReceiveSupportInputStream[request == "cancel"]
+    select 'receive selected options' as messageName
+insert into RECMessageStream;
+
+from ReceiveSupportInputStream[request == "transfer"]
+    select 'receive selected options' as messageName
+insert into RECMessageStream;
+
+from RequestActionInputStream[actionReq == true]
+    select 'job accepted and next action needed' as messageName
+insert into RECMessageStream;
+
+from AnotherRequestInputStream[anotherActionReq == true]
+    select 'another request' as messageName
+insert into RECMessageStream;
+
+from AnotherRequestInputStream[anotherActionReq == false]
+    select 'no more requests' as messageName
+insert into RECMessageStream;
+
+from NewCardInputStream[newCard == true]
+    select 'new card needed' as messageName
+insert into RECMessageStream;
+
+from CancelCardInputStream[cancelCard == true]
+    select 'cancel card' as messageName
+insert into RECMessageStream;
+
+from TransferInputStream[transfer == true]
+    select 'transfer card balance' as messageName
+insert into RECMessageStream;
+
+from ReceivedCardInputStream[sentCard == true]
+    select 'receive card' as messageName
+insert into RECMessageStream;
