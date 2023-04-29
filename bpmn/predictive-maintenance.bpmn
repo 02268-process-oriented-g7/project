@@ -230,7 +230,7 @@
         <bpmn:targetRef>DataStoreReference_0ihvy8a</bpmn:targetRef>
       </bpmn:dataOutputAssociation>
     </bpmn:task>
-    <bpmn:serviceTask id="Activity_0hybdsw" name="Apply machine learning model on data" camunda:type="external" camunda:topic="topicName">
+    <bpmn:serviceTask id="Activity_0hybdsw" name="Apply machine learning model on data" camunda:type="external" camunda:topic="machine_learning_model">
       <bpmn:incoming>Flow_02zwpz3</bpmn:incoming>
       <bpmn:outgoing>Flow_1ohf6cr</bpmn:outgoing>
       <bpmn:property id="Property_1v7fne2" name="__targetRef_placeholder" />

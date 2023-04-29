@@ -19,7 +19,7 @@ def handle_task(task: ExternalTask) -> TaskResult:
         return task.failure(error_message="task failed", error_details="failed task details",
                             max_retries=3, retry_timeout=5000)
 
-    print("sent an external event")
+    print("Applied machine model")
     return task.complete()
 
 
@@ -29,4 +29,4 @@ def random_true():
 
 
 if __name__ == '__main__':
-    ExternalTaskWorker(worker_id="1", config=default_config).subscribe("topicName", handle_task)
+    ExternalTaskWorker(worker_id="1", config=default_config).subscribe("machine_learning_model", handle_task)

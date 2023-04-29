@@ -16,7 +16,7 @@ Requires Python >3.7
 
 1. Create a virtual environment for python
 2. Install dependencies needed to run the script: `pip install -r requirements.txt` (from the directory)
-3. Run `main.py`
+3. Run the corresponding `.py` script for the BPMN diagram. E.g. `predictive-maintenance.bpmn` with `machine_learning_model.py`
 
 # Customer Issue Resolution (How-To)
 the choices for the "selection" that camunda model will accept as the 'SelectSupportOption' and 'Choice' variables in the Customer and Webpage processes respectively are the Strings: "new","transfer" and "cancel".
