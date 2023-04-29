@@ -49,14 +49,6 @@ define stream ReceivedCardInputStream (sentCard bool, instanceID string);
 @sink(type='log')
 define stream RECMessageStream(messageName string);
 
-@sink(type='http',
-publisher.url='http://localhost:8080/engine-rest/message',
-headers='Host:localhost:8080',
-@map(type='json', @payload("""{"messageName":"{{messageName}}", "all": true, "processVariables" : {
-    "supOpt" : {"value" : "{{supOpt}}", "type": "String"}
-}}""")))
-define stream RECVarStream(messageName string, supOpt string);
-
 
 from LoginInputStream[password == "Cool"]
     select 'login info' as messageName 
@@ -71,19 +63,16 @@ from ValidateInputStream[validity == false]
 insert into RECMessageStream;
 
 from ReceiveSupportInputStream[request  == "new"]
-    select 'receive selected options' as messageName,
-    'new' as supOpt
-insert into RECVarStream;
+    select 'receive selected options' as messageName
+insert into RECMessageStream;
 
 from ReceiveSupportInputStream[request == "cancel"]
-    select 'receive selected options' as messageName,
-    'cancel' as supOpt
-insert into RECVarStream;
+    select 'receive selected options' as messageName
+insert into RECMessageStream;
 
 from ReceiveSupportInputStream[request == "transfer"]
-    select 'receive selected options' as messageName,
-    'transfer' as supOpt
-insert into RECVarStream;
+    select 'receive selected options' as messageName
+insert into RECMessageStream;
 
 from RequestActionInputStream[actionReq == true]
     select 'job accepted and next action needed' as messageName
