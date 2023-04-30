@@ -1,0 +1,29 @@
+@App:name("CamundaStream")
+
+@App:description("Description of the plan")
+
+@source(type='http', receiver.url='http://localhost:8081/requestCheckIn', @map(type='json') ) 
+@sink(type='log') 
+define stream CamundaInputStreamCard(requestCheck string, instanceID string);
+
+
+
+
+
+@sink(type='http',
+    publisher.url='http://localhost:8080/engine-rest/message',
+    headers = "Host:localhost:8080",
+    @map(type='json', @payload("""{"messageName":"{{messageName}}", "all": true}""")))
+@sink(type='log')
+define stream MessageStream(messageName string);
+
+
+
+from CamundaInputStreamCard[requestCheck == "bluePoint"]
+select 'msg_check blue point' as messageName
+insert into MessageStream;
+
+
+from CamundaInputStreamCard[requestCheck == "app"]
+select 'msg_appp' as messageName
+insert into MessageStream;
