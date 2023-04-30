@@ -1,6 +1,7 @@
 @App:name("PredictiveMaintenance")
 @App:description("Description of the plan")
 
+
 @source(type='http', receiver.url='http://localhost:8081/gatherData', @map(type='json'))
 @sink(type='log')
 define stream GatherData(componentLifetime int, installedSensor string);
@@ -26,3 +27,22 @@ insert into MessageStream;
 from Model[assessmentPassed == true]
 select 'Assessment' as messageName
 insert into MessageStream;
+
+-- Alert if there is a discrepancy from the previous sensor
+from 
+every (el1 = GatherData) ->
+    el2 = GatherData [el1.installedSensor != installedSensor]
+select el2.installedSensor as message
+insert into DiscrepancyStream;
+
+-- Check how long a component had a maximum lifetime
+from every
+    e1 = GatherData,
+    e2 = GatherData[e1.componentLifetime <= componentLifetime]+,
+    e3 = GatherData[e2[last].componentLifetime > componentLifetime]
+    select e1.componentLifetime as initialLifetime, e2[last].componentLifetime as maxLifetime, e2[last].installedSensor as longestLastingSensor
+    insert into LifetimeStream;
+    
+
+
+
